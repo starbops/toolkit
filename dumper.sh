@@ -10,3 +10,6 @@ kubectl get pods -A -o json | jq -r '.items[] | [.metadata.namespace, .metadata.
                 kubectl -n "$namespace" get pods "$name" -o yaml > "$DUMP_DIR"/"$namespace"-"$name".yaml
                 kubectl -n "$namespace" logs "$name" --all-containers > "$DUMP_DIR"/"$namespace"-"$name".log
         done
+
+NOW=$(date +%Y%m%d%H%M%S)
+tar -zcvf dump-"$NOW".tar.gz "$DUMP_DIR"
