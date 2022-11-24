@@ -1,9 +1,9 @@
 #!/usr/bin/env sh
 set -x
 
-DUMP_DIR=/tmp/dump
+trap "\rm -rf $DUMP_DIR" EXIT
 
-mkdir -p "$DUMP_DIR"
+DUMP_DIR=$(mktemp -p /tmp -d)
 
 kubectl get pods -A -o json | jq -r '.items[] | [.metadata.namespace, .metadata.name] | @tsv' |
         while IFS=$'\t' read -r namespace name; do
