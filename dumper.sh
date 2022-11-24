@@ -19,3 +19,5 @@ kubectl get pods -A -o json | jq -r '.items[] | [.metadata.namespace, .metadata.
 
 NOW=$(date +%Y%m%d%H%M%S)
 tar -zcvf dump-"$NOW".tar.gz "$DUMP_DIR"
+
+echo "The archive is at $(dirname -- $(readlink -f -- $0))/dump-$NOW.tar.gz"
