@@ -63,7 +63,7 @@ sudo virt-install \
     --wait=-1
 
 # Create remaining nodes
-for i in $(seq 1 "$NODE_COUNT"); do
+for i in $(seq 1 $(($NODE_COUNT - 1))); do
   echo "Creating node $i..."
       sudo virt-install \
       --name=node-$i \
