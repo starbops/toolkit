@@ -2,6 +2,7 @@
 
 NODE_COUNT=$1
 HARVESTER_VERSION=$2
+HARVESTER_ISO_IMAGE=""
 
 # Configurables
 # For bootstrap node
@@ -31,7 +32,7 @@ if [ -z "$NODE_COUNT" ]; then
   exit 1
 fi
 if [ -z "$HARVESTER_VERSION" ]; then
-  echo "Please specify a valid version of Harvester of the desired cluster."
+  echo "Please specify a valid version of Harvester of the desired cluster or provide a path of the ISO image."
   exit 1
 fi
 if [ -x "$(which virt-install)" ]; then
@@ -41,9 +42,18 @@ else
   exit 1
 fi
 
-# Download ISO image for installation
-echo "Downloading Harvester $HARVESTER_VERSION ISO image to $TMP_DIR ..."
-curl -sfL "https://releases.rancher.com/harvester/$HARVESTER_VERSION/harvester-$HARVESTER_VERSION-amd64.iso" -o "$TMP_DIR"/harvester-"$HARVESTER_VERSION"-amd64.iso
+# Prepare ISO image for installation
+if [[ "$HARVESTER_VERSION" =~ .*.iso$ ]]; then
+  HARVESTER_ISO_IMAGE=$(basename "$HARVESTER_VERSION")
+  echo "Using the designated ISO image: $HARVESTER_ISO_IMAGE"
+  cp -a "$HARVESTER_VERSION" "$TMP_DIR"
+else
+  HARVESTER_ISO_IMAGE="harvester-$HARVESTER_VERSION-amd64.iso"
+  echo "Downloading Harvester $HARVESTER_VERSION ISO image to $TMP_DIR ..."
+  curl -sfL "https://releases.rancher.com/harvester/$HARVESTER_VERSION/$HARVESTER_ISO_IMAGE" -o "$TMP_DIR"/"$HARVESTER_ISO_IMAGE"
+fi
+
+HARVESTER_ISO_PATH="$TMP_DIR/$HARVESTER_ISO_IMAGE"
 
 # Create bootstrap node
 echo "Creating bootstrap node..."
@@ -56,7 +66,7 @@ sudo virt-install \
     --disk path=/var/lib/libvirt/images/node-0.img,bus=virtio,size="$BOOTSTRAP_NODE_DISK" \
     --graphics=vnc \
     --noautoconsole \
-    --cdrom="$TMP_DIR"/harvester-"$HARVESTER_VERSION"-amd64.iso \
+    --cdrom="$HARVESTER_ISO_PATH" \
     --network=bridge=br0,model=virtio,mac=52:54:00:00:00:01 \
     --network=bridge=br0,model=virtio,mac=52:54:00:00:00:02 \
     --network=network=default,model=virtio,mac=52:54:00:00:00:03 \
@@ -74,7 +84,7 @@ for i in $(seq 1 $(($NODE_COUNT - 1))); do
       --disk path=/var/lib/libvirt/images/node-$i.img,bus=virtio,size="$REMAINING_NODE_DISK" \
       --graphics=vnc \
       --noautoconsole \
-      --cdrom="$TMP_DIR"/harvester-"$HARVESTER_VERSION"-amd64.iso \
+      --cdrom="$HARVESTER_ISO_PATH" \
       --network=bridge=br0,model=virtio,mac=52:54:00:00:0$i:01 \
       --network=bridge=br0,model=virtio,mac=52:54:00:00:0$i:02 \
       --network=network=default,model=virtio,mac=52:54:00:00:0$i:03 \
