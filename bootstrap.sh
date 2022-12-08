@@ -57,9 +57,9 @@ sudo virt-install \
     --graphics=vnc \
     --noautoconsole \
     --cdrom="$TMP_DIR"/harvester-"$HARVESTER_VERSION"-amd64.iso \
-    --network=network=default,model=virtio,mac=52:54:00:00:00:01 \
+    --network=bridge=br0,model=virtio,mac=52:54:00:00:00:01 \
     --network=bridge=br0,model=virtio,mac=52:54:00:00:00:02 \
-    --network=bridge=br0,model=virtio,mac=52:54:00:00:00:03 \
+    --network=network=default,model=virtio,mac=52:54:00:00:00:03 \
     --wait=-1
 
 # Create remaining nodes
@@ -75,9 +75,9 @@ for i in $(seq 1 $(($NODE_COUNT - 1))); do
       --graphics=vnc \
       --noautoconsole \
       --cdrom="$TMP_DIR"/harvester-"$HARVESTER_VERSION"-amd64.iso \
-      --network=network=default,model=virtio,mac=52:54:00:00:0$i:01 \
+      --network=bridge=br0,model=virtio,mac=52:54:00:00:0$i:01 \
       --network=bridge=br0,model=virtio,mac=52:54:00:00:0$i:02 \
-      --network=bridge=br0,model=virtio,mac=52:54:00:00:0$i:03 \
+      --network=network=default,model=virtio,mac=52:54:00:00:0$i:03 \
       --wait=-1
 done
 
