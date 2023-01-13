@@ -6,11 +6,11 @@ NODE_COUNT=$1
 # For bootstrap node
 BOOTSTRAP_NODE_VCPUS=8
 BOOTSTRAP_NODE_RAM=16384
-BOOTSTRAP_NODE_DISK=200
+BOOTSTRAP_NODE_DISK=250
 # For remaining nodes
 REMAINING_NODE_VPUCS=8
-REMAINING_NODE_RAM=8192
-REMAINING_NODE_DISK=200
+REMAINING_NODE_RAM=16384
+REMAINING_NODE_DISK=250
 
 # Sanity checks
 if [ -z "$NODE_COUNT" ]; then
@@ -22,6 +22,11 @@ if [ -x "$(which virt-install)" ]; then
 else
   echo "Please install virt-install first."
   exit 1
+fi
+
+if [ "$NODE_COUNT" -eq 1 ]; then
+    BOOTSTRAP_NODE_VCPUS=12
+    BOOTSTRAP_NODE_RAM=24576
 fi
 
 # Create bootstrap node
